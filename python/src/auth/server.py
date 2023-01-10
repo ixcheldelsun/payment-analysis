@@ -14,6 +14,20 @@ server.config["MYSQL_DB"] = os.environ.get("MYSQL_DB")
 server.config["MYSQL_PORT"] = os.environ.get("MYSQL_PORT")
 
 
+def createJWT(username, secret, authz):
+    return jwt.encode(
+        {
+            "username": username,
+            "exp": datetime.datetime.now(tz=datetime.timezone.utc) + datetime.timedelta(days=1),
+            "iat": datetime.datetime.utcnow(),
+            "admin": authz,
+        },
+        secret,
+        algorithm="HS256"
+    )
+    
+
+
 @server.route("/login", methods=["POST"])
 def login():
     auth = request.authorization
@@ -37,3 +51,7 @@ def login():
             return createJWT(auth.username, os.environ.get('JWT_SECRET'), True)
     else:
         return "invalid credentials", 401
+    
+
+if __name__ == "__main__":
+    server.run(port=5000, host="0.0.0.0")
