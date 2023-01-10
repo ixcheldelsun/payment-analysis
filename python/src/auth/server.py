@@ -52,6 +52,27 @@ def login():
     else:
         return "invalid credentials", 401
     
+    
+@server.route("/validate", method=["POST"])
+def validate():
+    encoded_jwt = request.headers["Authorization"]
+    
+    if not encoded_jwt:
+        return "missing credentials", 401
+    
+    encoded_jwt = encoded_jwt.split(" ")[1]
+    
+    try:
+        decoded = jwt.decode(
+            encoded_jwt,
+            os.environ.get('JWT_SECRET'),
+            algorithm="HS256"
+        )
+    except:
+        return "not authorized", 503
+    
+    return decoded
+    
 
 if __name__ == "__main__":
     server.run(port=5000, host="0.0.0.0")
