@@ -1,22 +1,21 @@
-import datetime, os
 from flask import Flask, request, render_template
-from flask_mysqldb import MySQL
-from utils import check_credentials, get_user, get_payments_summary
+from services.user import service as user_service 
+from services.payment import service as payment_service
 from flask_mail import Mail, Message
+from flask_mysqldb import MySQL
 
 from config import settings
-
 
 server = Flask(__name__)
 mysql = MySQL(server)
 
 
 # config
-server.config["MYSQL_HOST"] = settings.MYSQL_HOST
-server.config["MYSQL_USER"] = settings.MYSQL_USER
-server.config["MYSQL_PASSWORD"] = settings.MYSQL_PASSWORD
-server.config["MYSQL_DB"] = settings.MYSQL_DB
-server.config["MYSQL_PORT"] = settings.MYSQL_PORT
+server.config['MYSQL_HOST'] = settings.MYSQL_HOST
+server.config['MYSQL_USER'] = settings.MYSQL_USER
+server.config['MYSQL_PASSWORD'] = settings.MYSQL_PASSWORD
+server.config['MYSQL_DB'] = settings.MYSQL_DB
+server.config['MYSQL_PORT'] = settings.MYSQL_PORT
 
 server.config['MAIL_SERVER']=settings.MAIL_SERVER
 server.config['MAIL_PORT'] = settings.MAIL_PORT
@@ -25,8 +24,9 @@ server.config['MAIL_PASSWORD'] = settings.MAIL_PASSWORD
 server.config['MAIL_USE_TLS'] = settings.MAIL_USE_TLS
 server.config['MAIL_USE_SSL'] = settings.MAIL_USE_SSL
 
+# email service
 mail = Mail(server)
-    
+
     
 @server.route("/register", methods=["POST", "GET"])
 def create_user():
@@ -35,47 +35,32 @@ def create_user():
         if 'password' in request.form and 'email' in request.form :
             password = request.form['password']
             email = request.form['email']
-            # substitute this to create user service
-            exists = check_credentials(cur, email)
-            if not exists:
-                cur.execute(
-                    f"INSERT INTO users VALUES (NULL, % s, % s);", (email, password)
-                )
-                mysql.connection.commit()
-                return "user created successfully", 201
-            else:
-                return "email already used", 400
+            msg, http_code = user_service.create_user(cur, mysql, email, password)
+            return msg, http_code
     else:
-        cur.execute("SELECT email FROM users;")
-        users = cur.fetchall()
-        return str(users), 200
+        return user_service.get_all_users(cur)
     
-
 
 @server.route("/payment", methods=["POST", "GET"])
 def create_payment():
+    cur = mysql.connection.cursor()
     if request.method == 'GET':
-        cur = mysql.connection.cursor()
-        cur.execute("SELECT user, amount, DATE_FORMAT(date_created, '%d %m %Y')  FROM payments;")
-        payments = cur.fetchall()
-        return str(payments), 200
+        return payment_service.get_all_payments(cur)
     elif request.method == 'POST':
         data = request.form
-        # substitute this to create user service
-        cur = mysql.connection.cursor()
-        user_id = get_user(cur, data["email"])
-        cur.execute(
-            f"""INSERT INTO payments VALUES (NULL, %s, %s, %s)""", 
-            (user_id, data["amount"], datetime.datetime.utcnow(),)
-        )
-        mysql.connection.commit()
-        return "payment created successfully", 201
+        user_id = user_service.get_user(cur, data["email"])
+        if not user_id:
+            return "user not found", 404
+        return payment_service.create_payment(cur, mysql, user_id, data)     
     
     
 @server.route("/payment/<user_email>", methods=["GET"])
 def get_payments(user_email):
     cur = mysql.connection.cursor()
-    payments_info = get_payments_summary(cur, user_email)
+    user_id = user_service.get_user(cur, user_email)
+    if not user_id:
+        return "user not found", 404
+    payments_info = payment_service.get_user_payments_summary(cur, user_id)
     msg = Message(
                 'Here is your payments summary 💳',
                 sender=settings.MAIL_USERNAME,
