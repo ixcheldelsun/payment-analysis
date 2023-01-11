@@ -1,7 +1,7 @@
 import datetime, os
 from flask import Flask, request
 from flask_mysqldb import MySQL
-from utils import check_credentials
+from utils import check_credentials, get_user
 
 from config import settings
 
@@ -42,23 +42,24 @@ def create_user():
     
 
 
-@server.route("/payment", methods=["POST"])
+@server.route("/payment", methods=["POST", "GET"])
 def create_payment():
-    # if 'token' in request.form:
-    #     token = request.form['token']
-    #     try:
-    #         data = jwt.decode(token, server.config["SECRET_KEY"], algorithms=["HS256"])
-    data = request.form
-    # substitute this to create user service
-    cur = mysql.connection.cursor()
-    cur.execute(
-        f"INSERT INTO payments (email, amount, date_created) VALUES ({data['email']}, {data['amount']}, {datetime.datetime.utcnow()});"
-    )
-    mysql.connection.commit()
-    return "payment created successfully", 200
-    #     except:
-    #         return "invalid token", 400
-    # return "token not found", 400
+    if request.method == 'GET':
+        cur = mysql.connection.cursor()
+        cur.execute("SELECT user, amount, DATE_FORMAT(date_created, '%d %m %Y')  FROM payments;")
+        payments = cur.fetchall()
+        return str(payments), 200
+    elif request.method == 'POST':
+        data = request.form
+        # substitute this to create user service
+        cur = mysql.connection.cursor()
+        user_id = get_user(cur, data["email"])
+        cur.execute(
+            f"""INSERT INTO payments VALUES (NULL, %s, %s, %s)""", 
+            (user_id, data["amount"], datetime.datetime.utcnow(),)
+        )
+        mysql.connection.commit()
+        return "payment created successfully", 201
     
 
 if __name__ == "__main__":

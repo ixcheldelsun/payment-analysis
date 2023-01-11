@@ -14,6 +14,8 @@ CREATE TABLE users (
 
 CREATE TABLE payments (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user INT NOT NULL,
     amount VARCHAR(255) NOT NULL,
-    date_created DATETIME NOT NULL
+    date_created DATETIME NOT NULL,
+    FOREIGN KEY (user) REFERENCES users(id)
 );
