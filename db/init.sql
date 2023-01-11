@@ -1,6 +1,6 @@
 CREATE USER 'admin'@'localhost' IDENTIFIED WITH mysql_native_password BY 'admin';
 
-CREATE DATABASE test;
+CREATE DATABASE IF NOT EXISTS test;
 
 GRANT ALL PRIVILEGES ON test.* TO 'admin'@'localhost';
 
