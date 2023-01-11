@@ -1,7 +1,8 @@
 import datetime, os
-from flask import Flask, request
+from flask import Flask, request, render_template
 from flask_mysqldb import MySQL
-from utils import check_credentials, get_user
+from utils import check_credentials, get_user, get_payments_summary
+from flask_mail import Mail, Message
 
 from config import settings
 
@@ -16,6 +17,15 @@ server.config["MYSQL_USER"] = settings.MYSQL_USER
 server.config["MYSQL_PASSWORD"] = settings.MYSQL_PASSWORD
 server.config["MYSQL_DB"] = settings.MYSQL_DB
 server.config["MYSQL_PORT"] = settings.MYSQL_PORT
+
+server.config['MAIL_SERVER']=settings.MAIL_SERVER
+server.config['MAIL_PORT'] = settings.MAIL_PORT
+server.config['MAIL_USERNAME'] = settings.MAIL_USERNAME
+server.config['MAIL_PASSWORD'] = settings.MAIL_PASSWORD
+server.config['MAIL_USE_TLS'] = settings.MAIL_USE_TLS
+server.config['MAIL_USE_SSL'] = settings.MAIL_USE_SSL
+
+mail = Mail(server)
     
     
 @server.route("/register", methods=["POST", "GET"])
@@ -60,6 +70,22 @@ def create_payment():
         )
         mysql.connection.commit()
         return "payment created successfully", 201
+    
+    
+@server.route("/payment/<user_email>", methods=["GET"])
+def get_payments(user_email):
+    cur = mysql.connection.cursor()
+    payments_info = get_payments_summary(cur, user_email)
+    msg = Message(
+                'Here is your payments summary 💳',
+                sender=settings.MAIL_USERNAME,
+                recipients = ['ixcheldelsolga@gmail.com']
+               )
+    msg.body = 'Hello Flask message sent from Flask-Mail'
+    msg.html = render_template('summary.html', data=payments_info)
+    mail.send(msg)
+    return 'Sent', 200
+
     
 
 if __name__ == "__main__":

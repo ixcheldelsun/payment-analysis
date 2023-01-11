@@ -10,5 +10,12 @@ class Config(BaseSettings):
     MYSQL_DB: str
     MYSQL_PORT: int
     
+    MAIL_SERVER: str = "smtp.gmail.com"
+    MAIL_PORT: int = 465
+    MAIL_USERNAME: str 
+    MAIL_PASSWORD: str 
+    MAIL_USE_TLS: bool = False
+    MAIL_USE_SSL: bool = True
+    
 
 settings = Config()

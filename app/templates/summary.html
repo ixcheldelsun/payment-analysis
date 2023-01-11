@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block main %}
+
+    <p>Hello {{username}},</p>
+
+    <p>You have requested a summary of your payments. So here you go!</p>
+
+    <ul>
+        <li>Total Balance: {{data['total_balance']}}</li>
+        <li>Average <b>debit</b> amount: {{data['avg_by_type']['debit']}}</li>
+        <li>Average <b>credit</b> amount: {{data['avg_by_type']['credit']}}</li>
+        {% for month, trxs in data['monthly_payments'].items() %}
+        <li>Number of transactions in {{month}}: {{trxs}}</li>
+        {% endfor %}
+    </ul>
+
+    <p>Thanks for using our service!</p>
+
+{% endblock %}
+
+
