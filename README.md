@@ -6,4 +6,4 @@ If you need to shutdown, apply docker-compose down -v to delete volumes and crea
 
 To get everything up and running with vitual environment:
 
-
+flask --debug run --host=0.0.0.0  --port=8080

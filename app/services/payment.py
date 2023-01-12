@@ -1,4 +1,5 @@
 import datetime 
+from itertools import chain
 
 class PaymentService:
     
@@ -8,7 +9,7 @@ class PaymentService:
     def get_all_payments(self, cur):
         cur.execute("SELECT user, amount, DATE_FORMAT(date_created, '%d %m %Y')  FROM payments;")
         payments = cur.fetchall()
-        return str(payments), 200
+        return [list(element) for element in payments], 200
 
     
     def create_payment(self, cur, db, user_id:int, data:dict):

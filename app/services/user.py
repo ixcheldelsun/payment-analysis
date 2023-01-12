@@ -1,3 +1,5 @@
+from itertools import chain
+
 
 class UserService:
     def __init__(self):
@@ -22,8 +24,8 @@ class UserService:
 
     def get_all_users(self, cur):
         cur.execute("SELECT email FROM users;")
-        users = cur.fetchall()
-        return str(users), 200
+        users = cur.fetchall()        
+        return list(chain(*users)), 200
     
     
     def get_user(self, cur, email:str):
