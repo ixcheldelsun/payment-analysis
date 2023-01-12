@@ -1,10 +1,10 @@
-##To get everything up and running with Docker:
+## To get everything up and running with Docker:
 
 docker-compose up --build
 
 If you need to shutdown, apply docker-compose down -v to delete volumes and create new database.
 
-##To get everything up and running with vitual environment:
+## To get everything up and running with vitual environment:
 
 python3 -m venv venv
 
@@ -18,7 +18,7 @@ PD: si necesitan volver a levantarla deben de correr los comandos  mysql -uroot 
 
 cd app && gunicorn app:app
 
-##Documentation
+## Documentation
 
 Swagger documentation can be found in the /apidocs/ endpoint.
 
