@@ -81,7 +81,7 @@ def get_payments(user_email):
     msg = Message(
                 'Here is your payments summary 💳',
                 sender=settings.MAIL_USERNAME,
-                recipients = ['ixcheldelsolga@gmail.com']
+                recipients = [user_email]
                )
     msg.body = 'Hello Flask message sent from Flask-Mail'
     msg.html = render_template('summary.html', data=payments_info)
