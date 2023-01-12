@@ -12,6 +12,10 @@ source venv/bin/activate
 
 pip install -r requirements.txt
 
+mysql -uroot < db/init.sql (Para crear las tablas en la base de datos)
+
+PD: si necesitan volver a levantarla deben de correr los comandos  mysql -uroot -e "DROP user test@localhost" y  mysql -uroot -e "DROP DATABASE test"
+
 cd app && gunicorn app:app
 
 ##Documentation
