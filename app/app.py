@@ -9,30 +9,30 @@ from flask_restful import Api, Resource
 from config import settings
 import json
 
-server = Flask(__name__)
-api = Api(server)
-mysql = MySQL(server)
-swagger = Swagger(server, template=settings.SWAGGER_TEMPLATE)
+app = Flask(__name__)
+api = Api(app)
+mysql = MySQL(app)
+swagger = Swagger(app, template=settings.SWAGGER_TEMPLATE)
 
 # config
-server.config['MYSQL_HOST'] = settings.MYSQL_HOST
-server.config['MYSQL_USER'] = settings.MYSQL_USER
-server.config['MYSQL_PASSWORD'] = settings.MYSQL_PASSWORD
-server.config['MYSQL_DB'] = settings.MYSQL_DB
-server.config['MYSQL_PORT'] = settings.MYSQL_PORT
+app.config['MYSQL_HOST'] = settings.MYSQL_HOST
+app.config['MYSQL_USER'] = settings.MYSQL_USER
+app.config['MYSQL_PASSWORD'] = settings.MYSQL_PASSWORD
+app.config['MYSQL_DB'] = settings.MYSQL_DB
+app.config['MYSQL_PORT'] = settings.MYSQL_PORT
 
-server.config['MAIL_SERVER']=settings.MAIL_SERVER
-server.config['MAIL_PORT'] = settings.MAIL_PORT
-server.config['MAIL_USERNAME'] = settings.MAIL_USERNAME
-server.config['MAIL_PASSWORD'] = settings.MAIL_PASSWORD
-server.config['MAIL_USE_TLS'] = settings.MAIL_USE_TLS
-server.config['MAIL_USE_SSL'] = settings.MAIL_USE_SSL
+app.config['MAIL_SERVER']=settings.MAIL_SERVER
+app.config['MAIL_PORT'] = settings.MAIL_PORT
+app.config['MAIL_USERNAME'] = settings.MAIL_USERNAME
+app.config['MAIL_PASSWORD'] = settings.MAIL_PASSWORD
+app.config['MAIL_USE_TLS'] = settings.MAIL_USE_TLS
+app.config['MAIL_USE_SSL'] = settings.MAIL_USE_SSL
 
 # email service
-mail = Mail(server)
+mail = Mail(app)
 
 # apis    
-@server.route("/register", methods=["POST", "GET"])
+@app.route("/register", methods=["POST", "GET"])
 def create_user():
     """Endpoint to create a user given an email and password.
     
@@ -55,7 +55,7 @@ def create_user():
         
     
 
-@server.route("/payment", methods=["POST", "GET"])
+@app.route("/payment", methods=["POST", "GET"])
 def create_payment():
     """Endpoint to create a user given an email and password."""
     cur = mysql.connection.cursor()
@@ -71,7 +71,7 @@ def create_payment():
         return payment_service.create_payment(cur, mysql, user_id, data)     
     
     
-@server.route("/payment/<user_email>", methods=["GET"])
+@app.route("/payment/<user_email>", methods=["GET"])
 def get_payments(user_email):
     cur = mysql.connection.cursor()
     user_id = user_service.get_user(cur, user_email)
@@ -198,4 +198,4 @@ api.add_resource(PaymentSummary, '/payment/<user_email>')
     
 
 if __name__ == "__main__":
-    server.run(port=8080, host="0.0.0.0", debug=True)
+    app.run(port=8080, host="0.0.0.0", debug=True)

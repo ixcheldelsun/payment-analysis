@@ -5,3 +5,4 @@ python-dotenv==0.19.0
 pydantic==1.10.4
 flasgger
 flask_restful
+gunicorn
